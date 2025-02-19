@@ -1,0 +1,9 @@
+[package]
+name = "dms-pdfmaker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+docx-rs = "0.4.17"
+serde = "1.0.217"
+serde_json = "1.0.138"
