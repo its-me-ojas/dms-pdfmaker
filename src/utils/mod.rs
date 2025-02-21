@@ -24,9 +24,9 @@ pub fn convert_docx_to_pdf(input: &str, output_dir: &str) -> std::io::Result<()>
         .status()?;
 
     if status.success() {
-        println!("Conversion successful!");
+        println!("converted to pdf!");
     } else {
-        eprintln!("Conversion failed.");
+        eprintln!("conversion failed.");
     }
 
     Ok(())
