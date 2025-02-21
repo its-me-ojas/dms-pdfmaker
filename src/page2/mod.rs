@@ -3,28 +3,28 @@ use docx_rs::{
     AlignmentType, Paragraph, Run, Table, TableCell, TableCellBorderPosition, TableRow, WidthType,
 };
 
-pub fn page2_content() -> (Vec<Paragraph>, Table) {
+pub fn page2_content_withTable() -> (Vec<Paragraph>, Table) {
     let table = Table::new(vec![
         TableRow::new(vec![
             TableCell::new()
-                .width(10, WidthType::Pct)
-                .add_paragraph(Paragraph::new()),
+                .width(500, WidthType::Dxa)
+                .add_paragraph(Paragraph::new().add_run(Run::new().add_text(""))),
             TableCell::new()
-                .width(30, WidthType::Pct)
+                .width(2000, WidthType::Dxa)
                 .add_paragraph(create_paragraph("Item")),
             TableCell::new()
-                .width(12, WidthType::Pct)
+                .width(1000, WidthType::Dxa)
                 .clear_border(TableCellBorderPosition::Right)
                 .add_paragraph(create_paragraph("")),
             TableCell::new()
-                .width(12, WidthType::Pct)
+                .width(1000, WidthType::Dxa)
                 .add_paragraph(create_paragraph("Budget")),
             TableCell::new()
-                .width(12, WidthType::Pct)
+                .width(1000, WidthType::Dxa)
                 .clear_border(TableCellBorderPosition::Left)
                 .add_paragraph(create_paragraph("")),
             TableCell::new()
-                .width(24, WidthType::Pct)
+                .width(1500, WidthType::Dxa)
                 .add_paragraph(create_paragraph("Justification")),
         ]),
         TableRow::new(vec![
@@ -106,4 +106,29 @@ pub fn page2_content() -> (Vec<Paragraph>, Table) {
     ];
 
     (paragraphs, table)
+}
+
+pub fn page2_content_signatures() -> Vec<Paragraph> {
+    vec![
+        Paragraph::new(),
+        create_paragraph("14. Any other information which the investigator may like to give in support of his proposal"),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new()
+            .align(AlignmentType::Left)
+            .add_run(Run::new().add_text("Signature of the Applicant").size(24)),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new(),
+        Paragraph::new()
+            .align(AlignmentType::Right)
+            .add_run(Run::new().add_text("Head of the Department").bold().size(26)),
+
+    ]
 }

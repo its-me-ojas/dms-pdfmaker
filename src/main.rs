@@ -1,6 +1,6 @@
 use docx_rs::{Docx, Paragraph};
 use page1::page1_content;
-use page2::page2_content;
+use page2::{page2_content_signatures, page2_content_withTable};
 
 mod page1;
 mod page2;
@@ -20,11 +20,17 @@ fn main() {
     doc = doc.add_paragraph(Paragraph::new().page_break_before(true));
 
     // page 2 content
-    let (paragraphs, table) = page2_content();
+    let (paragraphs, table) = page2_content_withTable();
     for paragraph in paragraphs {
         doc = doc.add_paragraph(paragraph);
     }
     doc = doc.add_table(table);
+    for paragraph in page2_content_signatures() {
+        doc = doc.add_paragraph(paragraph);
+    }
 
     doc.build().pack(file).unwrap();
+
+    // converting to pdf
+    utils::convert_docx_to_pdf("dms.docx", "output").unwrap();
 }

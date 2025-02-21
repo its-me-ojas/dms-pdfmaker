@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use docx_rs::{Paragraph, Run, TableCell};
 
 pub fn create_paragraph(text: &str) -> Paragraph {
@@ -7,4 +9,25 @@ pub fn empty_row(cols: usize) -> Vec<TableCell> {
     (0..cols)
         .map(|_| TableCell::new().add_paragraph(Paragraph::new()))
         .collect()
+}
+
+pub fn convert_docx_to_pdf(input: &str, output_dir: &str) -> std::io::Result<()> {
+    let status = Command::new("libreoffice")
+        .args([
+            "--headless",
+            "--convert-to",
+            "pdf",
+            "--outdir",
+            output_dir,
+            input,
+        ])
+        .status()?;
+
+    if status.success() {
+        println!("Conversion successful!");
+    } else {
+        eprintln!("Conversion failed.");
+    }
+
+    Ok(())
 }
