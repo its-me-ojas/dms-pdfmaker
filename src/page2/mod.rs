@@ -3,7 +3,7 @@ use docx_rs::{
     AlignmentType, Paragraph, Run, Table, TableCell, TableCellBorderPosition, TableRow, WidthType,
 };
 
-pub fn page2_content_withTable() -> (Vec<Paragraph>, Table) {
+pub fn page2_content_with_table() -> (Vec<Paragraph>, Table) {
     let table = Table::new(vec![
         TableRow::new(vec![
             TableCell::new()

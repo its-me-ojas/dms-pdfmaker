@@ -8,7 +8,7 @@ use axum::{
 };
 use docx_rs::{Docx, Paragraph};
 use page1::page1_content;
-use page2::{page2_content_signatures, page2_content_withTable};
+use page2::{page2_content_signatures, page2_content_with_table};
 use std::fs;
 
 mod page1;
@@ -32,7 +32,7 @@ async fn generate_document() -> Response<Body> {
     doc = doc.add_paragraph(Paragraph::new().page_break_before(true));
 
     // page 2 content
-    let (paragraphs, table) = page2_content_withTable();
+    let (paragraphs, table) = page2_content_with_table();
     for paragraph in paragraphs {
         doc = doc.add_paragraph(paragraph);
     }
