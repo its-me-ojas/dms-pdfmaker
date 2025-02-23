@@ -11,6 +11,7 @@ pub fn empty_row(cols: usize) -> Vec<TableCell> {
         .collect()
 }
 
+#[allow(dead_code)]
 pub fn convert_docx_to_pdf(input: &str, output_dir: &str) -> std::io::Result<()> {
     let status = Command::new("libreoffice")
         .args([

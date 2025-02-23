@@ -13,6 +13,7 @@ pub struct LoginRequest {
     pub password: String,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct LoginResponse {
     pub token: String,
@@ -32,6 +33,7 @@ pub struct CoPI {
     status: String,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize, Debug)]
 pub struct Submission {
     #[serde(rename = "_id")]
@@ -102,6 +104,7 @@ pub struct SubmissionResponse {
     discarded_at: Option<String>,
 }
 
+#[allow(dead_code)]
 impl SubmissionResponse {
     pub fn from_submissions(submissions: Vec<Submission>) -> Vec<Self> {
         submissions

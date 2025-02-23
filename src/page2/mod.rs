@@ -5,8 +5,8 @@ use crate::{
 use docx_rs::{
     AlignmentType, Paragraph, Run, Table, TableCell, TableCellBorderPosition, TableRow, WidthType,
 };
-use image::SubImage;
 
+#[allow(dead_code)]
 pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Table) {
     let table = Table::new(vec![
         TableRow::new(vec![
@@ -177,6 +177,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     (paragraphs, table)
 }
 
+#[allow(dead_code)]
 pub fn page2_content_signatures() -> Vec<Paragraph> {
     vec![
         Paragraph::new(),

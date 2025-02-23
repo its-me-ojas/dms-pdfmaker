@@ -3,6 +3,7 @@ use docx_rs::{AlignmentType, Paragraph, Pic, Run};
 use std::fs::File;
 use std::io::Read;
 
+#[allow(dead_code)]
 pub fn page1_content(submission: &Submission) -> Vec<Paragraph> {
     let mut file = File::open("./public/thapar_logo.png").expect("Failed to open logo file");
     let mut buffer = Vec::new();
