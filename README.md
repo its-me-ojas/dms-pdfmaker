@@ -12,9 +12,14 @@ This service provides API endpoints that generate formatted PDF documents contai
 
 ## Prerequisites
 
+### Local Development
 - Rust (latest stable version)
 - LibreOffice (for PDF conversion)
 - Cargo (Rust's package manager)
+
+### Docker Deployment
+- Docker
+- Docker Compose
 
 ## Dependencies
 
@@ -45,13 +50,32 @@ dms-pdfmaker/
 │   └── utils/           # Utility functions
 │       └── mod.rs
 ├── public/              # Static assets
-│   └── thapar_logo.png
+│   └── thapar_logo.png  # Required logo file
 ├── output/              # Generated PDF output directory
+├── Dockerfile
+├── docker-compose.yml
 ├── Cargo.toml
 └── README.md
 ```
 
 ## Installation
+
+### Docker Installation (Recommended)
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/dms-pdfmaker.git
+cd dms-pdfmaker
+```
+
+2. Ensure the `public` folder contains the required `thapar_logo.png` file
+
+3. Build and run using Docker Compose:
+```bash
+docker-compose up --build
+```
+
+### Local Installation
 
 1. Clone the repository:
 ```bash
@@ -61,15 +85,15 @@ cd dms-pdfmaker
 
 2. Install LibreOffice (if not already installed):
 - Ubuntu/Debian:
-  ```bash
-  sudo apt-get install libreoffice
-  ```
+```bash
+sudo apt-get install libreoffice
+```
 - MacOS:
-  ```bash
-  brew install --cask libreoffice
-  ```
+```bash
+brew install --cask libreoffice
+```
 - Windows:
-  Download and install from [LibreOffice website](https://www.libreoffice.org/download/download/)
+Download and install from [LibreOffice website](https://www.libreoffice.org/download/download/)
 
 3. Create output directory:
 ```bash
@@ -83,22 +107,17 @@ cargo build --release
 
 ## Usage
 
-1. Start the server:
-```bash
-cargo run
-```
-
-2. The server will start on `http://0.0.0.0:8080` with the following endpoints:
+The server will start on `http://0.0.0.0:8080` with the following endpoints:
 - `GET /` - Returns a "Hello, World!" message (health check)
 - `GET /generate` - Generates and returns the PDF document
 - `GET /fetch-submissions` - Fetches all submissions from the DMS API
 
-3. To generate a PDF:
+### Generate PDF
 ```bash
 curl http://localhost:8080/generate --output document.pdf
 ```
 
-4. To fetch submissions:
+### Fetch Submissions
 ```bash
 curl http://localhost:8080/fetch-submissions
 ```
@@ -127,6 +146,17 @@ curl http://localhost:8080/fetch-submissions
   - Body: Array of submission objects
 - Error Responses:
   - 500 Internal Server Error: If fetching or parsing fails
+
+## Docker Configuration
+
+### Environment Variables
+- `RUST_LOG=info` - Sets logging level
+
+### Volumes
+- `./data:/usr/src/app/data` - Mounted for temporary file storage
+
+### Ports
+- `8080:8080` - Exposed for HTTP service
 
 ## Error Handling
 
