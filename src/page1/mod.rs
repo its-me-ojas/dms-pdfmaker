@@ -1,18 +1,26 @@
+use crate::models::Submission;
+use docx_rs::{AlignmentType, Paragraph, Pic, Run};
 use std::fs::File;
 use std::io::Read;
 
-use docx_rs::{AlignmentType, Paragraph, Pic, Run};
-
-pub fn page1_content() -> Vec<Paragraph> {
+pub fn page1_content(submission: &Submission) -> Vec<Paragraph> {
     let mut file = File::open("./public/thapar_logo.png").expect("Failed to open logo file");
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)
         .expect("Failed to read logo file");
     let image = Pic::new(&buffer);
     vec![
-        Paragraph::new()
-            .align(AlignmentType::Center)
-            .add_run(Run::new().add_text("<Title>").bold().size(48)),
+        Paragraph::new().align(AlignmentType::Center).add_run(
+            Run::new()
+                .add_text(
+                    submission
+                        .project_title
+                        .as_ref()
+                        .unwrap_or(&"<Title>".to_string()),
+                )
+                .bold()
+                .size(48),
+        ),
         Paragraph::new(),
         Paragraph::new(),
         Paragraph::new(),
@@ -32,7 +40,7 @@ pub fn page1_content() -> Vec<Paragraph> {
         Paragraph::new(),
         Paragraph::new()
             .align(AlignmentType::Center)
-            .add_run(Run::new().add_text("<Name>").bold().size(48)),
+            .add_run(Run::new().add_text(&submission.user).bold().size(48)),
         Paragraph::new(),
         Paragraph::new()
             .align(AlignmentType::Center)
