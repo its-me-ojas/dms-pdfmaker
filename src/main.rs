@@ -125,12 +125,13 @@ async fn generate_document_with_data() -> Response<Body> {
     }
 
     let submission = &submitted_submissions[0];
+    let submission_id = submission.unique_id.clone();
 
-    let docx_path = "dms.docx";
-    let pdf_path = "output/dms.pdf";
+    let docx_path = format!("dms_{}.docx", submission_id);
+    let pdf_path = format!("output/dms_{}.pdf", submission_id);
 
     // create the Word document
-    let file = std::fs::File::create(docx_path).unwrap();
+    let file = std::fs::File::create(&docx_path).unwrap();
     let mut doc = Docx::new();
 
     // page 1 content
@@ -154,14 +155,14 @@ async fn generate_document_with_data() -> Response<Body> {
     doc.build().pack(file).unwrap();
 
     // convert to PDF
-    match utils::convert_docx_to_pdf(docx_path, "output") {
-        Ok(_) => match fs::read(pdf_path) {
+    match utils::convert_docx_to_pdf(&docx_path, "output") {
+        Ok(_) => match fs::read(&pdf_path) {
             Ok(pdf_content) => Response::builder()
                 .status(StatusCode::OK)
                 .header(header::CONTENT_TYPE, "application/pdf")
                 .header(
                     header::CONTENT_DISPOSITION,
-                    "attachment; filename=\"document.pdf\"",
+                    format!("attachment; filename=\"dms_{}.pdf\"", submission_id),
                 )
                 .body(Body::from(pdf_content))
                 .unwrap(),
