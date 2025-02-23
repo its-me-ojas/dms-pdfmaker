@@ -88,6 +88,80 @@ struct Submission {
     discarded_at: Option<DateTime<Utc>>,
 }
 
+#[derive(Serialize)]
+struct SubmissionResponse {
+    id: String,
+    status: String,
+    track: String,
+    track_code: Option<String>,
+    unique_id: String,
+    updated_at: String,
+    user: String,
+    created_at: Option<String>,
+    max_filled: Option<i32>,
+    additional_information: Option<String>,
+    date_phd_award: Option<String>,
+    funding_department: Option<String>,
+    project_duration: Option<ProjectDuration>,
+    project_keywords: Option<Vec<String>>,
+    project_objective: Option<Vec<String>>,
+    project_objective_new: Option<String>,
+    project_summary: Option<String>,
+    project_title: Option<String>,
+    proposal_supporting_files: Option<Vec<serde_json::Value>>,
+    total_cost: Option<String>,
+    co_pi: Option<Vec<CoPI>>,
+    discarded_at: Option<String>,
+}
+
+impl SubmissionResponse {
+    fn from_submissions(submissions: Vec<Submission>) -> Vec<Self> {
+        submissions
+            .into_iter()
+            .map(|s| Self {
+                id: s.id,
+                status: s.status,
+                track: s.track,
+                track_code: s.track_code,
+                unique_id: s.unique_id,
+                updated_at: s.updated_at.to_rfc3339(),
+                user: s.user,
+                created_at: s.created_at.map(|d| d.to_rfc3339()),
+                max_filled: s.max_filled,
+                additional_information: s.additional_information,
+                date_phd_award: s.date_phd_award,
+                funding_department: s.funding_department,
+                project_duration: s.project_duration,
+                project_keywords: s.project_keywords,
+                project_objective: s.project_objective,
+                project_objective_new: s.project_objective_new,
+                project_summary: s.project_summary,
+                project_title: s.project_title,
+                proposal_supporting_files: s.proposal_supporting_files,
+                total_cost: s.total_cost,
+                co_pi: s.co_pi,
+                discarded_at: s.discarded_at.map(|d| d.to_rfc3339()),
+            })
+            .collect()
+    }
+
+    fn to_json_response(submissions: Vec<Submission>) -> Response<Body> {
+        let response_submissions = Self::from_submissions(submissions);
+
+        match serde_json::to_string(&response_submissions) {
+            Ok(json) => Response::builder()
+                .status(StatusCode::OK)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(json))
+                .unwrap(),
+            Err(_) => Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from("Failed to serialize submissions"))
+                .unwrap(),
+        }
+    }
+}
+
 async fn admin_login() -> Result<String, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
 
@@ -146,84 +220,14 @@ async fn get_submissions() -> Response<Body> {
         }
     };
 
-    println!("token: {}", token);
+    // println!("token: {}", token);
 
     // Then fetch submissions
-    let submissions = match fetch_submissions(&token).await {
-        Ok(submissions) => submissions,
-        Err(_) => {
-            return Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Body::from("Failed to fetch submissions"))
-                .unwrap();
-        }
-    };
-
-    // Add derive(Serialize) to the response
-    #[derive(Serialize)]
-    struct SubmissionResponse {
-        id: String,
-        status: String,
-        track: String,
-        track_code: Option<String>,
-        unique_id: String,
-        updated_at: String,
-        user: String,
-        created_at: Option<String>,
-        max_filled: Option<i32>,
-        additional_information: Option<String>,
-        date_phd_award: Option<String>,
-        funding_department: Option<String>,
-        project_duration: Option<ProjectDuration>,
-        project_keywords: Option<Vec<String>>,
-        project_objective: Option<Vec<String>>,
-        project_objective_new: Option<String>,
-        project_summary: Option<String>,
-        project_title: Option<String>,
-        proposal_supporting_files: Option<Vec<serde_json::Value>>,
-        total_cost: Option<String>,
-        co_pi: Option<Vec<CoPI>>,
-        discarded_at: Option<String>,
-    }
-
-    // Convert submissions to a format that can be easily serialized
-    let response_submissions: Vec<SubmissionResponse> = submissions
-        .into_iter()
-        .map(|s| SubmissionResponse {
-            id: s.id,
-            status: s.status,
-            track: s.track,
-            track_code: s.track_code,
-            unique_id: s.unique_id,
-            updated_at: s.updated_at.to_rfc3339(),
-            user: s.user,
-            created_at: s.created_at.map(|d| d.to_rfc3339()),
-            max_filled: s.max_filled,
-            additional_information: s.additional_information,
-            date_phd_award: s.date_phd_award,
-            funding_department: s.funding_department,
-            project_duration: s.project_duration,
-            project_keywords: s.project_keywords,
-            project_objective: s.project_objective,
-            project_objective_new: s.project_objective_new,
-            project_summary: s.project_summary,
-            project_title: s.project_title,
-            proposal_supporting_files: s.proposal_supporting_files,
-            total_cost: s.total_cost,
-            co_pi: s.co_pi,
-            discarded_at: s.discarded_at.map(|d| d.to_rfc3339()),
-        })
-        .collect();
-
-    match serde_json::to_string(&response_submissions) {
-        Ok(json) => Response::builder()
-            .status(StatusCode::OK)
-            .header(header::CONTENT_TYPE, "application/json")
-            .body(Body::from(json))
-            .unwrap(),
+    match fetch_submissions(&token).await {
+        Ok(submissions) => SubmissionResponse::to_json_response(submissions),
         Err(_) => Response::builder()
             .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Body::from("Failed to serialize submissions"))
+            .body(Body::from("Failed to fetch submissions"))
             .unwrap(),
     }
 }
@@ -250,6 +254,10 @@ async fn generate_document_with_data() -> Response<Body> {
                 .unwrap();
         }
     };
+    // for submission in &submissions {
+    //     println!("{:#?}", submission);
+    // }
+    // let response_data = SubmissionResponse::from_submissions(submissions);
 
     let docx_path = "dms.docx";
     let pdf_path = "output/dms.pdf";
