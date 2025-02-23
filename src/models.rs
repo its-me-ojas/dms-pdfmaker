@@ -20,9 +20,9 @@ pub struct LoginResponse {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProjectDuration {
-    days: i32,
-    months: i32,
-    years: i32,
+    pub days: i32,
+    pub months: i32,
+    pub years: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

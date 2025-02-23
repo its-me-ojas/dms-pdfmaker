@@ -45,7 +45,7 @@ async fn fetch_submissions(token: &str) -> Result<Vec<Submission>, Box<dyn std::
         .send()
         .await?;
 
-    println!("Response Status: {}", response.status());
+    // println!("Response Status: {}", response.status());
 
     let body = response.text().await?;
     // println!("Response body: {}", body);
@@ -53,7 +53,7 @@ async fn fetch_submissions(token: &str) -> Result<Vec<Submission>, Box<dyn std::
     // Try parsing into Vec<Submission>
     match serde_json::from_str::<Vec<Submission>>(&body) {
         Ok(submissions) => {
-            println!("Successfully parsed {} submissions", submissions.len());
+            // println!("Successfully parsed {} submissions", submissions.len());
             Ok(submissions)
         }
         Err(e) => {
@@ -89,7 +89,7 @@ async fn get_submissions() -> Response<Body> {
 }
 
 async fn generate_document_with_data() -> Response<Body> {
-    // First get the token
+    // get token
     let token = match admin_login().await {
         Ok(token) => token,
         Err(_) => {
@@ -100,7 +100,7 @@ async fn generate_document_with_data() -> Response<Body> {
         }
     };
 
-    // Then fetch submissions
+    // then fetch submissions
     let submissions = match fetch_submissions(&token).await {
         Ok(submissions) => submissions,
         Err(_) => {
@@ -143,7 +143,7 @@ async fn generate_document_with_data() -> Response<Body> {
     doc = doc.add_paragraph(Paragraph::new().page_break_before(true));
 
     // page 2 content
-    let (paragraphs, table) = page2_content_with_table();
+    let (paragraphs, table) = page2_content_with_table(submission);
     for paragraph in paragraphs {
         doc = doc.add_paragraph(paragraph);
     }
@@ -155,17 +155,29 @@ async fn generate_document_with_data() -> Response<Body> {
     doc.build().pack(file).unwrap();
 
     // convert to PDF
-    match utils::convert_docx_to_pdf(&docx_path, "output") {
+    let response = match utils::convert_docx_to_pdf(&docx_path, "output") {
         Ok(_) => match fs::read(&pdf_path) {
-            Ok(pdf_content) => Response::builder()
-                .status(StatusCode::OK)
-                .header(header::CONTENT_TYPE, "application/pdf")
-                .header(
-                    header::CONTENT_DISPOSITION,
-                    format!("attachment; filename=\"dms_{}.pdf\"", submission_id),
-                )
-                .body(Body::from(pdf_content))
-                .unwrap(),
+            Ok(pdf_content) => {
+                let response = Response::builder()
+                    .status(StatusCode::OK)
+                    .header(header::CONTENT_TYPE, "application/pdf")
+                    .header(
+                        header::CONTENT_DISPOSITION,
+                        format!("attachment; filename=\"dms_{}.pdf\"", submission_id),
+                    )
+                    .body(Body::from(pdf_content))
+                    .unwrap();
+
+                // clean up files after creating the response
+                if let Err(e) = fs::remove_file(&docx_path) {
+                    println!("Error removing DOCX file: {}", e);
+                }
+                if let Err(e) = fs::remove_file(&pdf_path) {
+                    println!("Error removing PDF file: {}", e);
+                }
+
+                response
+            }
             Err(_) => Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Body::from("Failed to read PDF file"))
@@ -175,9 +187,10 @@ async fn generate_document_with_data() -> Response<Body> {
             .status(StatusCode::INTERNAL_SERVER_ERROR)
             .body(Body::from("Failed to generate PDF"))
             .unwrap(),
-    }
-}
+    };
 
+    response
+}
 async fn root() -> &'static str {
     "Hello, World!"
 }
@@ -189,7 +202,7 @@ async fn main() {
         .route("/generate", get(generate_document_with_data))
         .route("/fetch-submissions", get(get_submissions));
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    println!("server started...");
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    println!("server started on port 8080...");
     axum::serve(listener, app).await.unwrap();
 }

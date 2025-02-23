@@ -1,9 +1,13 @@
-use crate::utils::{create_paragraph, empty_row};
+use crate::{
+    models::Submission,
+    utils::{create_paragraph, empty_row},
+};
 use docx_rs::{
     AlignmentType, Paragraph, Run, Table, TableCell, TableCellBorderPosition, TableRow, WidthType,
 };
+use image::SubImage;
 
-pub fn page2_content_with_table() -> (Vec<Paragraph>, Table) {
+pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Table) {
     let table = Table::new(vec![
         TableRow::new(vec![
             TableCell::new()
@@ -49,24 +53,55 @@ pub fn page2_content_with_table() -> (Vec<Paragraph>, Table) {
     ])
     .width(100, WidthType::Pct);
 
+    let total_months = (submission.project_duration.as_ref().unwrap().years * 12)
+        + submission.project_duration.as_ref().unwrap().months
+        + (submission.project_duration.as_ref().unwrap().days as f32 / 30.0).floor() as i32;
+
     let paragraphs = vec![
         Paragraph::new()
             .align(AlignmentType::Center)
             .add_run(Run::new().add_text("Section A").bold().size(48)),
         Paragraph::new(),
-        create_paragraph("1. Project Title:"),
-        create_paragraph("2. Sub Area:"),
-        create_paragraph("3. Total Cost:"),
-        create_paragraph("4. Duration in months:"),
+        create_paragraph(
+            format!(
+                "1. Project Title: {}",
+                submission.project_title.as_ref().unwrap_or(&"".to_string())
+            )
+            .as_str(),
+        ),
+        create_paragraph(format!("2. Sub Area: {}", "").as_str()),
+        create_paragraph(
+            format!(
+                "3. Total Cost: {}",
+                submission.total_cost.as_ref().unwrap_or(&"".to_string())
+            )
+            .as_str(),
+        ),
+        create_paragraph(format!("4. Duration in months: {}", total_months).as_str()),
         create_paragraph("5. Name of the Investigator:"),
         create_paragraph("   • Designation:"),
-        create_paragraph("   • E-Code:"),
+        create_paragraph(
+            format!(
+                "   • E-Code: {}",
+                submission.track_code.as_ref().unwrap_or(&"".to_string())
+            )
+            .as_str(),
+        ),
         create_paragraph("   • Contact:"),
-        create_paragraph("   • Email:"),
+        create_paragraph(format!("   • Email: {}", submission.user).as_str()),
         create_paragraph("   • Department /School"),
         create_paragraph("   • Area of Specialization"),
         create_paragraph("   • Date of Joining the Institute"),
-        create_paragraph("   • Date of Award of Ph.D Degree"),
+        create_paragraph(
+            format!(
+                "   • Date of Award of Ph.D Degree: {}",
+                submission
+                    .date_phd_award
+                    .as_ref()
+                    .unwrap_or(&"".to_string())
+            )
+            .as_str(),
+        ),
         Paragraph::new(),
         Paragraph::new(),
         Paragraph::new(),
@@ -74,13 +109,47 @@ pub fn page2_content_with_table() -> (Vec<Paragraph>, Table) {
             .align(AlignmentType::Center)
             .add_run(Run::new().add_text("Section B").bold().size(48)),
         Paragraph::new(),
-        create_paragraph("6. Project Title"),
-        create_paragraph("7. Project summary (maximum 500 words)"),
-        create_paragraph("8. Key words:"),
+        create_paragraph(
+            format!(
+                "6. Project Title: {}",
+                submission.project_title.as_ref().unwrap_or(&"".to_string())
+            )
+            .as_str(),
+        ),
+        create_paragraph(
+            format!(
+                "7. Project Summary (maximum 500 words): {}",
+                submission
+                    .project_summary
+                    .as_ref()
+                    .unwrap_or(&"".to_string())
+            )
+            .as_str(),
+        ),
+        create_paragraph(
+            format!(
+                "8. Keywords: {}",
+                submission
+                    .project_keywords
+                    .as_ref()
+                    .map(|keyword| keyword.join(", "))
+                    .unwrap_or_else(|| "".to_string())
+            )
+            .as_str(),
+        ),
         create_paragraph("9. Introduction (under the following heads):"),
         create_paragraph("   • Origin of the proposal"),
         create_paragraph("   • Definition of the problem"),
-        create_paragraph("   • Objective"),
+        create_paragraph(
+            format!(
+                "   • Objective: {}",
+                submission
+                    .project_objective_new
+                    .as_ref()
+                    .unwrap_or(&"".to_string())
+            )
+            .as_str(),
+        ),
         create_paragraph("10. Review and status of Research and Development in the subject:"),
         create_paragraph("   • International Status"),
         create_paragraph("   • National Status"),
