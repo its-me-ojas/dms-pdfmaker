@@ -6,7 +6,7 @@ A Rust-based web service that generates standardized PDF documents for SEED Mone
 
 This service provides API endpoints that generate formatted PDF documents containing SEED Money Grant Proposal templates and fetch submission data. The document includes:
 - A cover page with institution details and logo
-- Sections for project details
+- Sections for project details with proper spacing between numbered points
 - A structured table for budget information
 - Signature sections
 
@@ -27,7 +27,7 @@ This service provides API endpoints that generate formatted PDF documents contai
 [dependencies]
 axum = "0.7.1"
 tokio = { version = "1.0", features = ["full"] }
-docx-rs = "0.4.6"
+docx-rs = "0.4.17"
 reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -105,16 +105,27 @@ mkdir output
 cargo build --release
 ```
 
+5. Run the server:
+```bash
+./target/release/dms-pdfmaker
+```
+
 ## Usage
 
 The server will start on `http://0.0.0.0:8080` with the following endpoints:
 - `GET /` - Returns a "Hello, World!" message (health check)
-- `GET /generate` - Generates and returns the PDF document
+- `GET /generate` - Generates and returns the PDF document using the first submitted application
 - `GET /fetch-submissions` - Fetches all submissions from the DMS API
+- `POST /generate-pdf` - Generates a PDF document based on the submitted JSON data
 
-### Generate PDF
+### Generate PDF from API data
 ```bash
 curl http://localhost:8080/generate --output document.pdf
+```
+
+### Generate PDF from custom JSON
+```bash
+curl -X POST -H "Content-Type: application/json" --data @mock_submission.json http://localhost:8080/generate-pdf -o custom_document.pdf
 ```
 
 ### Fetch Submissions
@@ -129,7 +140,7 @@ curl http://localhost:8080/fetch-submissions
 - Returns: "Hello, World!"
 
 ### GET /generate
-- Generates a PDF document based on the template
+- Generates a PDF document based on the first submitted application
 - Returns:
   - Status: 200 OK
   - Content-Type: application/pdf
@@ -137,6 +148,18 @@ curl http://localhost:8080/fetch-submissions
 - Error Responses:
   - 500 Internal Server Error: If PDF generation fails
   - 404 Not Found: If no submitted applications found
+
+### POST /generate-pdf
+- Generates a PDF document based on the submitted JSON data
+- Request:
+  - Content-Type: application/json
+  - Body: Submission JSON object
+- Returns:
+  - Status: 200 OK
+  - Content-Type: application/pdf
+  - Body: PDF file
+- Error Responses:
+  - 500 Internal Server Error: If PDF generation fails
 
 ### GET /fetch-submissions
 - Fetches all submissions from the DMS API
@@ -146,6 +169,18 @@ curl http://localhost:8080/fetch-submissions
   - Body: Array of submission objects
 - Error Responses:
   - 500 Internal Server Error: If fetching or parsing fails
+
+## Document Formatting Features
+
+### Line Spacing
+- Enhanced readability with proper spacing between numbered points
+- Consistent 12pt (240 twips) spacing after paragraphs
+- Clear visual separation between sections
+
+### Document Structure
+- Professional formatting with bold headers and standardized font sizes
+- Hierarchical organization of content with proper indentation
+- Well-formatted budget tables with clear column separation
 
 ## Docker Configuration
 
@@ -166,13 +201,49 @@ The service includes error handling for:
 - File system operations
 - Missing submissions
 - JSON parsing errors
+- PDF conversion issues
 
 ## File Management
 
 - Generated DOCX files are temporary and automatically cleaned up
 - PDFs are stored in the `output/` directory before being served
-- Each file is named with the submission's unique ID
+- Each file is named with a standardized format: `proposal_[unique_id].pdf`
+- Timestamp-based temporary files to prevent conflicts
 
 ## Authentication
 
 The service uses token-based authentication to communicate with the DMS API. Credentials are currently hardcoded for development purposes.
+
+## Development
+
+### Building
+```bash
+cargo build
+```
+
+### Testing with Mock Data
+```bash
+curl -X POST -H "Content-Type: application/json" --data @mock_submission.json http://localhost:8080/generate-pdf -o proposal.pdf
+```
+
+### Running in Docker
+```bash
+docker-compose up --build
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **PDF Generation Fails**
+   - Check that LibreOffice is installed and accessible
+   - Verify the output directory exists and is writable
+   - Ensure the template has the correct structure
+
+2. **Missing Logo**
+   - Confirm that `public/thapar_logo.png` exists
+   - Check file permissions
+
+3. **API Connectivity Issues**
+   - Verify network connection
+   - Check authentication credentials
