@@ -18,7 +18,6 @@ FROM debian:bookworm-slim
 
 # Install required runtime dependencies
 RUN apt-get update && apt-get install -y \
-    libreoffice \
     libssl3 \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
