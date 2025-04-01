@@ -1,5 +1,5 @@
 # Runtime stage
-FROM debian:bookworm-slim
+FROM ubuntu:jammy
 
 # Install required runtime dependencies
 RUN apt-get update && apt-get install -y \
