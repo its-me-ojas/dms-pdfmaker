@@ -6,12 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8058:8080"
     environment:
       - RUST_LOG=info
-    volumes:
-      - ./data:/usr/src/app/data
-    restart: unless-stopped
+    restart: always
 
 networks:
   default:
