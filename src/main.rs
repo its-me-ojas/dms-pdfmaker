@@ -15,6 +15,8 @@ use reqwest;
 use std::fs;
 use std::sync::Arc;
 use chrono;
+use tower_http::cors::{Any, CorsLayer}; // Import CorsLayer
+
 
 mod models;
 mod page1;
@@ -133,9 +135,15 @@ async fn root() -> &'static str {
 
 #[tokio::main]
 async fn main() {
+    let cors = CorsLayer::new()
+        .allow_origin(Any) // Allow requests from any origin
+        .allow_methods(Any) // Allow any HTTP method
+        .allow_headers(Any); // Allow any HTTP header
+
     let app = Router::new()
         .route("/", get(root))
-        .route("/generate-pdf", post(generate_document_from_json)); // New POST endpoint
+        .route("/submissions/download", post(generate_document_from_json)) // New POST endpoint
+        .layer(cors); // Add the CORS layer to the router
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
     println!("server started on port 8080...");
