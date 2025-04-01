@@ -1,9 +1,10 @@
 use axum::{
     self,
     body::Body,
+    extract::Json,
     http::{header, StatusCode},
     response::Response,
-    routing::get,
+    routing::{get, post},
     Router,
 };
 use docx_rs::{Docx, Paragraph};
@@ -12,6 +13,8 @@ use page1::page1_content;
 use page2::{page2_content_signatures, page2_content_with_table};
 use reqwest;
 use std::fs;
+use std::sync::Arc;
+use chrono;
 
 mod models;
 mod page1;
@@ -125,13 +128,45 @@ async fn generate_document_with_data() -> Response<Body> {
     }
 
     let submission = &submitted_submissions[0];
-    let submission_id = submission.unique_id.clone();
+    
+    generate_pdf(submission)
+}
 
-    let docx_path = format!("dms_{}.docx", submission_id);
-    let pdf_path = format!("output/dms_{}.pdf", submission_id);
+// New function for the POST endpoint that accepts a JSON submission
+async fn generate_document_from_json(Json(submission): Json<Submission>) -> Response<Body> {
+    generate_pdf(&submission)
+}
+
+// Helper function to generate PDF from a submission
+fn generate_pdf(submission: &Submission) -> Response<Body> {
+    let submission_id = &submission.unique_id;
+    let timestamp = chrono::Local::now().format("%Y%m%d%H%M%S");
+    
+    let docx_path = format!("temp_{}.docx", timestamp);
+    let pdf_filename = format!("proposal_{}.pdf", submission_id);
+    let pdf_path = format!("output/{}", pdf_filename);
+
+    // Ensure output directory exists
+    if let Err(e) = fs::create_dir_all("output") {
+        println!("Error creating output directory: {}", e);
+        return Response::builder()
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .body(Body::from("Failed to create output directory"))
+            .unwrap();
+    }
 
     // create the Word document
-    let file = std::fs::File::create(&docx_path).unwrap();
+    let file = match std::fs::File::create(&docx_path) {
+        Ok(file) => file,
+        Err(e) => {
+            println!("Error creating DOCX file: {}", e);
+            return Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from("Failed to create DOCX file"))
+                .unwrap();
+        }
+    };
+    
     let mut doc = Docx::new();
 
     // page 1 content
@@ -152,10 +187,16 @@ async fn generate_document_with_data() -> Response<Body> {
         doc = doc.add_paragraph(paragraph);
     }
 
-    doc.build().pack(file).unwrap();
+    if let Err(e) = doc.build().pack(file) {
+        println!("Error packing DOCX: {}", e);
+        return Response::builder()
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .body(Body::from("Failed to create DOCX document"))
+            .unwrap();
+    }
 
     // convert to PDF
-    let response = match utils::convert_docx_to_pdf(&docx_path, "output") {
+    let response = match utils::convert_docx_to_pdf(&docx_path, "output", Some(&pdf_filename)) {
         Ok(_) => match fs::read(&pdf_path) {
             Ok(pdf_content) => {
                 let response = Response::builder()
@@ -163,7 +204,7 @@ async fn generate_document_with_data() -> Response<Body> {
                     .header(header::CONTENT_TYPE, "application/pdf")
                     .header(
                         header::CONTENT_DISPOSITION,
-                        format!("attachment; filename=\"dms_{}.pdf\"", submission_id),
+                        format!("attachment; filename=\"{}\"", pdf_filename),
                     )
                     .body(Body::from(pdf_content))
                     .unwrap();
@@ -172,25 +213,29 @@ async fn generate_document_with_data() -> Response<Body> {
                 if let Err(e) = fs::remove_file(&docx_path) {
                     println!("Error removing DOCX file: {}", e);
                 }
-                if let Err(e) = fs::remove_file(&pdf_path) {
-                    println!("Error removing PDF file: {}", e);
-                }
 
                 response
             }
-            Err(_) => Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Body::from("Failed to read PDF file"))
-                .unwrap(),
+            Err(e) => {
+                println!("Error reading PDF file: {}", e);
+                Response::builder()
+                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .body(Body::from("Failed to read PDF file"))
+                    .unwrap()
+            }
         },
-        Err(_) => Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Body::from("Failed to generate PDF"))
-            .unwrap(),
+        Err(e) => {
+            println!("Error converting to PDF: {}", e);
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from("Failed to generate PDF"))
+                .unwrap()
+        }
     };
 
     response
 }
+
 async fn root() -> &'static str {
     "Hello, World!"
 }
@@ -200,7 +245,8 @@ async fn main() {
     let app = Router::new()
         .route("/", get(root))
         .route("/generate", get(generate_document_with_data))
-        .route("/fetch-submissions", get(get_submissions));
+        .route("/fetch-submissions", get(get_submissions))
+        .route("/generate-pdf", post(generate_document_from_json)); // New POST endpoint
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
     println!("server started on port 8080...");
