@@ -33,9 +33,8 @@ async fn generate_document_from_json(Json(submission): Json<Submission>) -> Resp
 // Helper function to generate PDF from a submission
 fn generate_pdf(submission: &Submission) -> Response<Body> {
     let submission_id = &submission.unique_id;
-    let timestamp = chrono::Local::now().format("%Y%m%d%H%M%S");
     
-    let docx_path = format!("temp_{}.docx", timestamp);
+    let docx_path = format!("docx_file_{}.docx", submission_id);
     let pdf_filename = format!("proposal_{}.pdf", submission_id);
     let pdf_path = format!("output/{}", pdf_filename);
 
@@ -87,6 +86,8 @@ fn generate_pdf(submission: &Submission) -> Response<Body> {
             .body(Body::from("Failed to create DOCX document"))
             .unwrap();
     }
+    
+    println!("Successfully created DOCX file: {}", docx_path);
 
     // convert to PDF
     let response = match utils::convert_docx_to_pdf(&docx_path, "output", Some(&pdf_filename)) {
@@ -111,6 +112,17 @@ fn generate_pdf(submission: &Submission) -> Response<Body> {
             }
             Err(e) => {
                 println!("Error reading PDF file: {}", e);
+                println!("DOCX file path: {}", docx_path);
+                println!("PDF file path: {}", pdf_path);
+                // List all files in the output directory
+                if let Ok(entries) = fs::read_dir("output") {
+                    println!("Files in output directory:");
+                    for entry in entries {
+                        if let Ok(entry) = entry {
+                            println!("  {}", entry.path().display());
+                        }
+                    }
+                }
                 Response::builder()
                     .status(StatusCode::INTERNAL_SERVER_ERROR)
                     .body(Body::from("Failed to read PDF file"))
@@ -119,6 +131,7 @@ fn generate_pdf(submission: &Submission) -> Response<Body> {
         },
         Err(e) => {
             println!("Error converting to PDF: {}", e);
+            println!("DOCX file path: {}", docx_path);
             Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Body::from("Failed to generate PDF"))

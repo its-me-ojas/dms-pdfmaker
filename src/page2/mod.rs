@@ -4,14 +4,29 @@ use crate::{
 };
 use docx_rs::{
     AlignmentType, Paragraph, Run, Table, TableCell, TableCellBorderPosition, TableRow, WidthType,
-    LineSpacing,
+    LineSpacing, RunFonts,
 };
 
 // Helper function to create a paragraph with bold heading and normal text content
 fn create_paragraph_with_bold_heading(heading: &str, content: &str) -> Paragraph {
     let mut paragraph = Paragraph::new();
-    paragraph = paragraph.add_run(Run::new().add_text(heading).bold().size(28).color("#2C3E50"));
-    paragraph = paragraph.add_run(Run::new().add_text(content).size(28).color("#2C3E50"));
+    // Use Calibri font for headings with black color instead of dark blue
+    paragraph = paragraph.add_run(
+        Run::new()
+            .add_text(heading)
+            .bold()
+            .size(28)
+            .fonts(RunFonts::new().ascii("Calibri"))
+            .color("#000000")  // Changed from #00355F (dark blue) to #000000 (black)
+    );
+    // Use a serif font (Georgia) for content with a dark gray color
+    paragraph = paragraph.add_run(
+        Run::new()
+            .add_text(content)
+            .size(28)
+            .fonts(RunFonts::new().ascii("Georgia"))
+            .color("#333333")  // Dark gray for better readability
+    );
     paragraph
 }
 
@@ -164,32 +179,280 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     paragraphs.push(
         Paragraph::new()
             .align(AlignmentType::Center)
-            .add_run(Run::new().add_text("Section A").bold().size(48))
+            .add_run(
+                Run::new()
+                    .add_text("Section A")
+                    .bold()
+                    .size(48)
+                    .fonts(RunFonts::new().ascii("Arial"))
+                    .color("#000000")  // Changed from #00355F (dark blue) to #000000 (black)
+            )
     );
     paragraphs.push(create_spacing_paragraph());
     
     // Section A content - add spacing between each point
     paragraphs.push(create_paragraph_with_bold_heading("1. Project Title: ", &project_title));
-    paragraphs.push(create_spacing_paragraph());
+    // paragraphs.push(create_spacing_paragraph());
     
     paragraphs.push(create_paragraph_with_bold_heading("2. Sub Area: ", &track));
-    paragraphs.push(create_spacing_paragraph());
+    // paragraphs.push(create_spacing_paragraph());
     
     paragraphs.push(create_paragraph_with_bold_heading("3. Total Cost: ", &total_cost));
-    paragraphs.push(create_spacing_paragraph());
+    // paragraphs.push(create_spacing_paragraph());
     
     paragraphs.push(create_paragraph_with_bold_heading("4. Duration in months: ", &total_months.to_string()));
-    paragraphs.push(create_spacing_paragraph());
+    // paragraphs.push(create_spacing_paragraph());
     
-    paragraphs.push(create_paragraph_with_bold_heading("5. Name of the Investigator:", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Designation:", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • E-Code: ", &track_code));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Contact:", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Email: ", &user_email));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Department /School:", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Area of Specialization:", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Date of Joining the Institute:", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • TRL Level: ", &trl_level));
+    paragraphs.push(create_paragraph_with_bold_heading("5. Name of the Project Investigator (UoQ/TIET):", ""));
+    
+    // Change the bullet points to be indented and non-bold for section 5
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None) // Add indentation (720 twips = 0.5 inch)
+            .add_run(
+                Run::new()
+                    .add_text("• Designation:")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Department /School")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Area of Specialization")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Date of Joining the Institute")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Date of Award of Ph.D Degree")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    // Add E-Code, Contact, Email and TRL Level
+    if !track_code.is_empty() {
+        paragraphs.push(
+            Paragraph::new()
+                .indent(Some(720), None, None, None)
+                .add_run(
+                    Run::new()
+                        .add_text(&format!("• E-Code: {}", track_code))
+                        .size(28)
+                        .fonts(RunFonts::new().ascii("Calibri"))
+                        .color("#000000")
+                )
+        );
+    }
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Contact:")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    if !user_email.is_empty() {
+        paragraphs.push(
+            Paragraph::new()
+                .indent(Some(720), None, None, None)
+                .add_run(
+                    Run::new()
+                        .add_text(&format!("• Email: {}", user_email))
+                        .size(28)
+                        .fonts(RunFonts::new().ascii("Calibri"))
+                        .color("#000000")
+                )
+        );
+    }
+    
+    if !trl_level.is_empty() {
+        paragraphs.push(
+            Paragraph::new()
+                .indent(Some(720), None, None, None)
+                .add_run(
+                    Run::new()
+                        .add_text(&format!("• TRL Level: {}", trl_level))
+                        .size(28)
+                        .fonts(RunFonts::new().ascii("Calibri"))
+                        .color("#000000")
+                )
+        );
+    }
+    
+    // Add Co-Project Investigator-1 section
+    paragraphs.push(create_spacing_paragraph());
+    paragraphs.push(create_paragraph_with_bold_heading("6. Name of the Co-Project Investigator-1 (UoQ/TIET):", ""));
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Designation:")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Department /School")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Area of Specialization")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Date of Joining the Institute")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    paragraphs.push(
+        Paragraph::new()
+            .indent(Some(720), None, None, None)
+            .add_run(
+                Run::new()
+                    .add_text("• Date of Award of Ph.D Degree")
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
+    
+    // Add Co-Project Investigator-2 section if there's a second Co-PI in the submission
+    if let Some(co_pis) = &submission.co_pi {
+        if co_pis.len() > 1 {
+            paragraphs.push(create_spacing_paragraph());
+            paragraphs.push(create_paragraph_with_bold_heading("7. Name of the Co-Project Investigator-2 (UoQ/TIET):", ""));
+            
+            paragraphs.push(
+                Paragraph::new()
+                    .indent(Some(720), None, None, None)
+                    .add_run(
+                        Run::new()
+                            .add_text("• Designation:")
+                            .size(28)
+                            .fonts(RunFonts::new().ascii("Calibri"))
+                            .color("#000000")
+                    )
+            );
+            
+            paragraphs.push(
+                Paragraph::new()
+                    .indent(Some(720), None, None, None)
+                    .add_run(
+                        Run::new()
+                            .add_text("• Department /School")
+                            .size(28)
+                            .fonts(RunFonts::new().ascii("Calibri"))
+                            .color("#000000")
+                    )
+            );
+            
+            paragraphs.push(
+                Paragraph::new()
+                    .indent(Some(720), None, None, None)
+                    .add_run(
+                        Run::new()
+                            .add_text("• Area of Specialization")
+                            .size(28)
+                            .fonts(RunFonts::new().ascii("Calibri"))
+                            .color("#000000")
+                    )
+            );
+            
+            paragraphs.push(
+                Paragraph::new()
+                    .indent(Some(720), None, None, None)
+                    .add_run(
+                        Run::new()
+                            .add_text("• Date of Joining the Institute")
+                            .size(28)
+                            .fonts(RunFonts::new().ascii("Calibri"))
+                            .color("#000000")
+                    )
+            );
+            
+            paragraphs.push(
+                Paragraph::new()
+                    .indent(Some(720), None, None, None)
+                    .add_run(
+                        Run::new()
+                            .add_text("• Date of Award of Ph.D Degree")
+                            .size(28)
+                            .fonts(RunFonts::new().ascii("Calibri"))
+                            .color("#000000")
+                    )
+            );
+        }
+    }
+    
     paragraphs.push(create_spacing_paragraph());
     
     // Line break before Section B
@@ -200,51 +463,66 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     paragraphs.push(
         Paragraph::new()
             .align(AlignmentType::Center)
-            .add_run(Run::new().add_text("Section B").bold().size(48))
+            .add_run(
+                Run::new()
+                    .add_text("Section B")
+                    .bold()
+                    .size(48)
+                    .fonts(RunFonts::new().ascii("Arial"))
+                    .color("#000000")
+            )
     );
     paragraphs.push(create_spacing_paragraph());
     
-    // Section B content - add spacing between each point
-    paragraphs.push(create_paragraph_with_bold_heading("6. Project Title: ", &project_title));
+    // Update the section numbers since we added new sections
+    paragraphs.push(create_paragraph_with_bold_heading("8. Project Title: ", &project_title));
     paragraphs.push(create_spacing_paragraph());
     
-    paragraphs.push(create_paragraph_with_bold_heading("7. Project Summary (maximum 500 words): ", &project_summary));
+    paragraphs.push(create_paragraph_with_bold_heading("9. Project Summary (maximum 500 words): ", &project_summary));
     paragraphs.push(create_spacing_paragraph());
     
-    paragraphs.push(create_paragraph_with_bold_heading("8. Keywords: ", &project_keywords));
+    paragraphs.push(create_paragraph_with_bold_heading("10. Keywords: ", &project_keywords));
     paragraphs.push(create_spacing_paragraph());
     
-    paragraphs.push(create_paragraph_with_bold_heading("9. Introduction (under the following heads):", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Origin of the proposal: ", &project_origin));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Definition of the problem: ", &problem_definition));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Objective: ", &objectives));
+    paragraphs.push(create_paragraph_with_bold_heading("11. Introduction (under the following heads):", ""));
+    paragraphs.push(create_paragraph_with_bold_heading("   11.1 Origin of the proposal: ", &project_origin));
+    paragraphs.push(create_paragraph_with_bold_heading("   11.2 Definition of the problem: ", &problem_definition));
+    paragraphs.push(create_paragraph_with_bold_heading("   11.3 Objective: ", &objectives));
     paragraphs.push(create_spacing_paragraph());
     
-    paragraphs.push(create_paragraph_with_bold_heading("10. Review and status of Research and Development in the subject:", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • International Status: ", &international_status));
-    paragraphs.push(create_paragraph_with_bold_heading("   • National Status: ", &national_status));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Importance of the proposed project in the context of current status: ", &project_importance));
-    paragraphs.push(create_paragraph_with_bold_heading("   • References: ", &references));
+    paragraphs.push(create_paragraph_with_bold_heading("12. Review and status of Research and Development in the subject:", ""));
+    paragraphs.push(create_paragraph_with_bold_heading("   12.1 International Status: ", &international_status));
+    paragraphs.push(create_paragraph_with_bold_heading("   12.2 National Status: ", &national_status));
+    paragraphs.push(create_paragraph_with_bold_heading("   12.3 Importance of the proposed project in the context of current status: ", &project_importance));
+    paragraphs.push(create_paragraph_with_bold_heading("   12.4 References: ", &references));
     paragraphs.push(create_spacing_paragraph());
     
-    paragraphs.push(create_paragraph_with_bold_heading("11. Work plan:", ""));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Methodology: ", &methodology));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Organization of work elements: ", &work_organization));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Time schedule of activities giving milestones: ", &timeline));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Deliverables: ", &deliverables));
+    paragraphs.push(create_paragraph_with_bold_heading("13. Work plan:", ""));
+    paragraphs.push(create_paragraph_with_bold_heading("   13.1 Methodology: ", &methodology));
+    paragraphs.push(create_paragraph_with_bold_heading("   13.2 Organization of work elements: ", &work_organization));
+    paragraphs.push(create_paragraph_with_bold_heading("   13.3 Time schedule of activities giving milestones: ", &timeline));
+    paragraphs.push(create_paragraph_with_bold_heading("   13.4 Deliverables: ", &deliverables));
     paragraphs.push(create_spacing_paragraph());
     
-    paragraphs.push(create_paragraph_with_bold_heading("12. Facilities available at TIET/UQ: ", &tiet_uq_facilities));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Industry Partner: ", &industry_partner));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Outside TIET/UQ Experts: ", &experts));
-    paragraphs.push(create_paragraph_with_bold_heading("   • Society Impact: ", &society_impact));
+    paragraphs.push(create_paragraph_with_bold_heading("14. Facilities available at TIET/UQ: ", &tiet_uq_facilities));
+    paragraphs.push(create_paragraph_with_bold_heading("   14.1 Industry Partner: ", &industry_partner));
+    paragraphs.push(create_paragraph_with_bold_heading("   14.2 Outside TIET/UQ Experts: ", &experts));
+    paragraphs.push(create_paragraph_with_bold_heading("   14.3 Society Impact: ", &society_impact));
     paragraphs.push(create_spacing_paragraph());
     
     // Add space before budget section
     paragraphs.push(Paragraph::new());
-    paragraphs.push(create_paragraph_with_bold_heading(
-        "13. Budget requirement with justification (Consumables, Equipment, Contingency)", ""
-    ));
+    paragraphs.push(
+        Paragraph::new()
+            .add_run(
+                Run::new()
+                    .add_text("15. Budget requirement with justification (Consumables, Equipment, Contingency)")
+                    .bold()
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")
+            )
+    );
     paragraphs.push(create_spacing_paragraph());
 
     (paragraphs, table)
@@ -318,24 +596,29 @@ fn format_experts(submission: &Submission) -> String {
 pub fn page2_content_signatures() -> Vec<Paragraph> {
     vec![
         Paragraph::new(),
-        create_paragraph_with_bold_heading("14. Any other information which the investigator may like to give in support of his proposal", ""),
+        Paragraph::new()
+            .add_run(
+                Run::new()
+                    .add_text("16. Any other information which the investigator may like to give in support of his proposal")
+                    .bold()
+                    .size(28)
+                    .fonts(RunFonts::new().ascii("Calibri"))
+                    .color("#000000")  // Changed from #00355F (dark blue) to #000000 (black)
+            ),
         create_spacing_paragraph(),
         Paragraph::new(),
         Paragraph::new(),
         Paragraph::new()
             .align(AlignmentType::Left)
-            .add_run(Run::new().add_text("Signature of the Applicant").size(24)),
+            .add_run(
+                Run::new()
+                    .add_text("Signature of the Applicant")
+                    .size(24)
+                    .fonts(RunFonts::new().ascii("Georgia"))
+                    .color("#333333")
+            ),
         Paragraph::new(),
         Paragraph::new(),
         Paragraph::new(),
-        // Paragraph::new(),
-        // Paragraph::new(),
-        // Paragraph::new(),
-        // Paragraph::new(),
-        // Paragraph::new(),
-        // Paragraph::new()
-        //     .align(AlignmentType::Right)
-        //     .add_run(Run::new().add_text("Head of the Department").bold().size(26)),
-
     ]
 }
