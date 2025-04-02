@@ -192,23 +192,23 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     // Section A content - add spacing between each point
     paragraphs.push(create_paragraph_with_bold_heading("1. Project Title: ", &project_title));
-    // paragraphs.push(create_spacing_paragraph());
+    paragraphs.push(create_spacing_paragraph());
     
     paragraphs.push(create_paragraph_with_bold_heading("2. Sub Area: ", &track));
-    // paragraphs.push(create_spacing_paragraph());
+    paragraphs.push(create_spacing_paragraph());
     
     paragraphs.push(create_paragraph_with_bold_heading("3. Total Cost: ", &total_cost));
-    // paragraphs.push(create_spacing_paragraph());
+    paragraphs.push(create_spacing_paragraph());
     
     paragraphs.push(create_paragraph_with_bold_heading("4. Duration in months: ", &total_months.to_string()));
-    // paragraphs.push(create_spacing_paragraph());
+    paragraphs.push(create_spacing_paragraph());
     
     paragraphs.push(create_paragraph_with_bold_heading("5. Name of the Project Investigator (UoQ/TIET):", ""));
     
     // Change the bullet points to be indented and non-bold for section 5
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None) // Add indentation (720 twips = 0.5 inch)
+            .indent(Some(500), None, None, None) // Add indentation (720 twips = 0.5 inch)
             .add_run(
                 Run::new()
                     .add_text("• Designation:")
@@ -220,7 +220,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Department /School")
@@ -232,7 +232,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Area of Specialization")
@@ -244,7 +244,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Date of Joining the Institute")
@@ -256,7 +256,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Date of Award of Ph.D Degree")
@@ -270,7 +270,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     if !track_code.is_empty() {
         paragraphs.push(
             Paragraph::new()
-                .indent(Some(720), None, None, None)
+                .indent(Some(500), None, None, None)
                 .add_run(
                     Run::new()
                         .add_text(&format!("• E-Code: {}", track_code))
@@ -283,7 +283,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Contact:")
@@ -296,7 +296,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     if !user_email.is_empty() {
         paragraphs.push(
             Paragraph::new()
-                .indent(Some(720), None, None, None)
+                .indent(Some(500), None, None, None)
                 .add_run(
                     Run::new()
                         .add_text(&format!("• Email: {}", user_email))
@@ -310,7 +310,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     if !trl_level.is_empty() {
         paragraphs.push(
             Paragraph::new()
-                .indent(Some(720), None, None, None)
+                .indent(Some(500), None, None, None)
                 .add_run(
                     Run::new()
                         .add_text(&format!("• TRL Level: {}", trl_level))
@@ -327,7 +327,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Designation:")
@@ -339,7 +339,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Department /School")
@@ -351,7 +351,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Area of Specialization")
@@ -363,7 +363,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Date of Joining the Institute")
@@ -375,7 +375,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
     
     paragraphs.push(
         Paragraph::new()
-            .indent(Some(720), None, None, None)
+            .indent(Some(500), None, None, None)
             .add_run(
                 Run::new()
                     .add_text("• Date of Award of Ph.D Degree")
@@ -393,7 +393,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
             
             paragraphs.push(
                 Paragraph::new()
-                    .indent(Some(720), None, None, None)
+                    .indent(Some(500), None, None, None)
                     .add_run(
                         Run::new()
                             .add_text("• Designation:")
@@ -405,7 +405,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
             
             paragraphs.push(
                 Paragraph::new()
-                    .indent(Some(720), None, None, None)
+                    .indent(Some(500), None, None, None)
                     .add_run(
                         Run::new()
                             .add_text("• Department /School")
@@ -417,7 +417,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
             
             paragraphs.push(
                 Paragraph::new()
-                    .indent(Some(720), None, None, None)
+                    .indent(Some(500), None, None, None)
                     .add_run(
                         Run::new()
                             .add_text("• Area of Specialization")
@@ -429,7 +429,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
             
             paragraphs.push(
                 Paragraph::new()
-                    .indent(Some(720), None, None, None)
+                    .indent(Some(500), None, None, None)
                     .add_run(
                         Run::new()
                             .add_text("• Date of Joining the Institute")
@@ -441,7 +441,7 @@ pub fn page2_content_with_table(submission: &Submission) -> (Vec<Paragraph>, Tab
             
             paragraphs.push(
                 Paragraph::new()
-                    .indent(Some(720), None, None, None)
+                    .indent(Some(500), None, None, None)
                     .add_run(
                         Run::new()
                             .add_text("• Date of Award of Ph.D Degree")
